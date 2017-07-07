@@ -1,0 +1,48 @@
+{
+  "name": "talks-fullstack-london-2017-2",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Talk for FullStack London (2017).",
+  "author": {
+    "name": "Athan Reines",
+    "email": "kgryte@gmail.com"
+  },
+  "contributors": [
+    {
+      "name": "Athan Reines",
+      "email": "kgryte@gmail.com"
+    }
+  ],
+  "scripts": {},
+  "main": "",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kgryte/talks-fullstack-london-2017-2.git"
+  },
+  "keywords": [
+		"talk",
+		"slides",
+		"presentation",
+    "fullstack",
+    "london",
+    "math",
+    "mathematics",
+    "numeric computing",
+    "javascript",
+    "js",
+    "nodejs",
+    "node",
+    "native",
+    "addons",
+    "add-ons"
+	],
+  "bugs": {
+    "url": "https://github.com/kgryte/talks-fullstack-london-2017-2/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "jshint": "2.x.x",
+    "jshint-stylish": "2.x.x"
+  },
+  "license": ""
+}
