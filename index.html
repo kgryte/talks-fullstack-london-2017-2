@@ -563,6 +563,68 @@ double c_hypot( const double x, const double y ) {
 
 			<section class="center">
 				<pre><code class="hljs c" contenteditable>
+/* addon.cpp */
+#include &lt;nan.h&gt;
+#include "hypot.h"
+
+namespace addon_hypot {
+
+    using Nan::FunctionCallbackInfo;
+    using Nan::ThrowTypeError;
+    using Nan::ThrowError;
+    using v8::Number;
+    using v8::Local;
+    using v8::Value;
+
+    void node_hypot( const FunctionCallbackInfo<Value>&amp; info ) {
+        if ( info.Length() != 2 ) {
+            ThrowError( "invalid invocation. Must provide 2 arguments." );
+            return;
+        }
+        if ( !info[ 0 ]-&gt;IsNumber() ) {
+            ThrowTypeError( "invalid input argument. First argument must be a number." );
+            return;
+        }
+        if ( !info[ 1 ]-&gt;IsNumber() ) {
+            ThrowTypeError( "invalid input argument. Second argument must be a number." );
+            return;
+        }
+        const double x = info[ 0 ]-&gt;NumberValue();
+        const double y = info[ 1 ]-&gt;NumberValue();
+
+        Local&lt;Number&gt; h = Nan::New( c_hypot( x, y ) );
+        info.GetReturnValue().Set( h );
+    }
+
+    NAN_MODULE_INIT( Init ) {
+        Nan::Export( target, "hypot", node_hypot );
+    }
+
+    NODE_MODULE( addon, Init )
+}
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Once our implementation is finished, we create a wrapper written in C++ which calls the C function.
+					</p>
+					<p>
+						Note the inclusion of NAN. Recall that NAN provides a stable API, abstracting away the differences between V8 versions.
+					</p>
+					<p>
+						Most of the C++ is unwrapping and wrapping object values. The function wrapper takes a single argument: the arguments object. We do some basic input value sanity checks and then proceed to unwrap the individual arguments x and y. Once we have x and y, we call our C function and set the return value.
+					</p>
+					<p>
+						And finally, we end by exporting an initialization, which is required of all Node.js native add-ons.
+					</p>
+					<p>
+						I should note that we did not have to write the implementation in a separate C file. We could have written in directly in our add-on file; however, using a separate file a) facilitates re-usability of source files in non-add-on contexts and b) is a more common scenario when working with existing codebases.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs c" contenteditable>
 # binding.gyp
 {
   'targets': [
