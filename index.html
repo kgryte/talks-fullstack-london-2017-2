@@ -445,6 +445,51 @@
 
 			<section class="center">
 				<aside class="notes">
+					Despite these challenges, native add-ons are highly important for numeric computing.
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Numeric Computing</h2>
+
+				<aside class="notes">
+					<p>
+						Native add-ons are important for numeric computing because they allow us to interface with high-performance numeric computing libraries written in C/C++.
+					</p>
+   					<p>
+   						What you find when combing through the implementations of Julia, R, and Python libraries like NumPy and SciPy is that a substantial amount of the functionality they expose relies on providing wrappers for existing numeric computing code bases written in C/C++ and Fortran.
+   					</p>
+   					<p>
+   						For example, for high-performance linear algebra, these platforms wrap BLAS and LAPACK. For fast Fourier transforms, they wrap FFTW. For BigInt, Julia wraps GMP. For BigFloat, Julia wraps MPFR.
+   					</p>
+   					<p>
+   						Node.js native add-ons allow us to do something similar as these other platforms; namely, expose high-performance numeric computing functionality to Node.js and to JavaScript.
+   					</p>
+   					<p>
+   						This means we can leverage highly optimized libraries which have stood the test of time and do less "reinventing the wheel".
+   					</p>
+   					<p>
+						In short, native add-ons allow us to do in Node.js what other environments used for numeric computing can do.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					At this point, we have discussed, at a high-level, what native add-ons are, their toolchain, some challenges, and motivated why they are important for numeric computing. Let's now make things a bit more concrete by working through a basic example...
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Basic Example</h2>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
 					(next slide)
 				</aside>
 			</section>
