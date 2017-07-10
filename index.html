@@ -139,7 +139,7 @@
   							I'll follow by showing a basic native add-on example.
   						</li>
    						<li>
-   							Before moving on to a more complex example where we need to write an add-on which links a BLAS library written in Fortran to the the JavaScript runtime.
+   							After the basic example, I'll move on to a more complex example where we need to write an add-on which links a BLAS library written in Fortran to the the JavaScript runtime.
    						</li>
    						<li>
    							Next, I'll will show performance comparisons.
@@ -148,12 +148,252 @@
    							Then, I'll discuss some of the hurdles we have faced writing native add-ons for numeric computing and how we have worked to address them.
    						</li>
    						<li>
-   							Before concluding, I will mention N-API, an ABI which aims to provide a stable abstraction layer over JavaScript engines.
+   							Before concluding, I will mention N-API, an application binary interface, or ABI, which aims to provide a stable abstraction layer over JavaScript engines.
    						</li>
    						<li>
    							And finally, I will offer some conclusions and additional resources you can use to get started using Node.js native add-ons for high-performance numeric computing.
    						</li>
    					</ul>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center">
+				<h2 class="no-text-transform">Native Add-ons</h2>
+
+				<aside class="notes">
+					<p>
+						Without further ado...intro.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<p>
+					Interface between JS running in Node.js and C/C++ libraries
+				</p>
+
+				<aside class="notes">
+					<p>
+						A Node.js native add-on provides an interface between JavaScript running in Node.js and, primarily, C/C++ libraries.
+					</p>
+					<p>
+						From the perspective of Node.js applications, an add-on is just another module which an application can <code>require</code>.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">APIs</h2>
+				<div class="row">
+					<ul class="column column-3">
+						&nbsp;
+					</ul>
+					<ul class="column column-8">
+						<li class="fragment">V8</li>
+						<li class="fragment">libuv</li>
+						<li class="fragment">Internal Libraries</li>
+						<li class="fragment">Dependencies</li>
+					</ul>
+				</div>
+
+				<aside class="notes">
+					<p>
+						Add-ons have access to four components of the Node.js runtime:
+					</p>
+     				<ul>
+     					<li>
+     						V8: C++ library which provides runs JavaScript. Allows creating objects, calling functions, etc.
+     					</li>
+     					<li>
+     						libuv: C library which implements the Node.js event loop, worker threads, and async behavior. Allows interacting with the filesystem, sockets, timers, and system events.
+     					</li>
+     					<li>
+     						Internal Node.js libraries: Node.js exposed C++ APIs.
+     					</li>
+     					<li>
+     						Node.js own dependencies: statically linked libraries; e.g., OpenSSL.
+     					</li>
+     				</ul>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Examples</h2>
+				<div class="row">
+					<ul class="column column-3">
+						&nbsp;
+					</ul>
+					<ul class="column column-8">
+						<li class="fragment"><a href="https://github.com/Level/leveldown">leveldown</a></li>
+						<li class="fragment"><a href="https://github.com/nickdesaulniers/node-nanomsg">node-nanomsg</a></li>
+						<li class="fragment"><a href="https://github.com/Automattic/node-canvas">node-canvas</a></li>
+						<li class="fragment"><a href="https://github.com/mapbox/node-sqlite3">node-sqlite3</a></li>
+						<li class="fragment"><a href="https://github.com/stdlib-js/stdlib">stdlib</a></li>
+					</ul>
+				</div>
+
+				<aside class="notes">
+					<p>
+						Native add-on examples...
+					</p>
+					<ul>
+						<li>
+							<a href="https://github.com/Level/leveldown">leveldown</a>: pure C++ Node.js LevelDB binding
+						</li>
+    					<li>
+    						<a href="https://github.com/nickdesaulniers/node-nanomsg">node-nanomsg</a>: Node.js binding for nanomsg</a>
+    					</li>
+    					<li>
+    						<a href="https://github.com/Automattic/node-canvas">node-canvas</a>: Cairo backed canvas implementation
+    					</li>
+     					<li>
+     						<a href="https://github.com/mapbox/node-sqlite3">node-sqlite3</a>: Node.js bindings for SQLite3
+     					</li>
+     					<li>
+     						<a href="https://github.com/stdlib-js/stdlib">stdlib</a>: contains Node.js bindings to high-performance BLAS libraries
+     					</li>
+     				</ul>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Why?</h2>
+
+				<aside class="notes">
+					Why would you choose a native add-on over plain JavaScript?
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<div class="row">
+					<ul class="column column-3">
+						&nbsp;
+					</ul>
+					<ul class="column column-8">
+						<li class="fragment">Leverage existing codebases</li>
+						<li class="fragment">Access lower-level APIs</li>
+						<li class="fragment">Non-JavaScript features</li>
+						<li class="fragment">Performance</li>
+					</ul>
+				</div>
+
+				<aside class="notes">
+					<p>
+						Four primary reasons...
+					</p>
+					<p>
+						One reason is that you want to link to existing C/C++ libraries. This allows you to avoid having to port and re-implement functionality in JavaScript, which, for larger libraries, can be a substantial undertaking.
+					</p>
+					<p>
+     					Next, you may want to access lower-level APIs, such as worker threads.
+     				</p>
+     				<p>
+     					Third, you may need language features not available in JavaScript, such as 64-bit integers or SIMD.
+     				<p>
+     					Last, you need a performance boost, including leveraging hardware optimization.
+     				</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					<p>
+						So now that you have decided to use native add-ons, how do you go about doing so?
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Toolchain</h2>
+
+				<aside class="notes">
+					And with that, we need to talk about the native add-on toolchain.
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">node-gyp</h2>
+
+				<aside class="notes">
+					<p>
+						We begin with node-gyp, which is a cross-platform command-line tool written in Node.js for compiling native add-ons for Node.js.
+					</p>
+					<p>
+						node-gyp bundles GYP and automatically downloads necessary development files and headers for target Node.js versions.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">GYP</h2>
+
+				<aside class="notes">
+					<p>
+     					GYP, generate your project, is a meta-build system, which builds other build systems, depending on the target platform.
+     				</p>
+     				<p>
+     					The aim of GYP is to replicate, as closely as possible, the native build setup of a target platform IDE. So, for example, on MacOS, that means generating XCode projects, etc. Or on Windows, Visual Studio projects.
+     				</p>
+     				<p>
+						And once GYP generates the build system, we can compile our add-on.
+     				</p>
+     				<p>
+     					Now, for a bit of background and to introduce a caveat in using GYP, GYP was developed in 2009, when Chrome was Windows-only. When they wanted to build for Mac, they did not want to maintain two separate build systems. So they created GYP to centralize build configuration and automatically generate native projects.
+     				</p>
+    				<p>
+    					As time moved on, so did the Chrome team. GYP has now been deprecated in favor of GN which targets Ninja. Despite being "abandonware", Node.js seems wedded to it for the foreseeable future.
+    				</p>
+    				<p>
+    					As an aside, this is part of the risk of hitching a ride on corporate projects, where they are not incentivized to maintain and devote resources to something they no longer use internally.
+    				</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					So, aside from the aforementioned caveat, node-gyp more or less works, but this does not mean that developing native add-ons are not without difficulty.
 				</aside>
 			</section>
 
