@@ -660,6 +660,37 @@ namespace addon_hypot {
 			</section>
 
 			<section class="center">
+				<pre><code class="hljs bash" contenteditable>
+# Navigate to add-on directory:
+$ cd path/to/hypot/binding.gyp
+
+# Generate build files:
+$ node-gyp configure
+
+# On Windows:
+# node-gyp configure --msvs_version=2015
+
+# Build add-on:
+$ node-gyp build
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Once we have created the four files, we can now build our add-on.
+					</p>
+					<p>
+						To do so, we navigate to the add-on directory containing the <code>binding.gyp</code> file.
+					</p>
+					<p>
+						Then we generate the build files using the <i>configure</i> subcommand. This step generates the build files which will be a Makefile on Unix platforms (including MacOS) and a vcxproj file on Windows.
+					</p>
+					<p>
+						Finally, we run <i>build</i> to actually compile the add-on.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
 				<aside class="notes">
 					(next slide)
 				</aside>
