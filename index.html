@@ -562,6 +562,42 @@ double c_hypot( const double x, const double y ) {
 			</section>
 
 			<section class="center">
+				<pre><code class="hljs c" contenteditable>
+# binding.gyp
+{
+  'targets': [
+    {
+      'target_name': 'addon',
+      'sources': [
+        'addon.cpp',
+        'hypot.c'
+      ],
+      'include_dirs': [
+		'&lt;!(node -e "require(\'nan\')")',
+		'./'
+      ]
+    }
+  ]
+}
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						We then create a minimal <i>binding.gyp</i> file, which GYP uses to generate the build project for the target platform.
+					</p>
+					<p>
+						In GYP speak, we define a target--here, the target name is "addon".
+					</p>
+					<p>
+						We then list each source file which should be compiled.
+					</p>
+					<p>
+						And finally, we list the directories which contain header files. Of note, the <code>&lt;!</code> instructs GYP to execute a command. Here, we want Node to evaluate the string containing the <code>require</code> statement. When NAN is required, it prints the location of its header files to stdout, thus allowing us to dynamically resolve the NAN header file location.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
 				<aside class="notes">
 					(next slide)
 				</aside>
