@@ -347,7 +347,7 @@
 				</aside>
 			</section>
 
-			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+			<section class="center" data-transition="slide-in slide-out" data-transition-speed="default">
 				<h2 class="no-text-transform">node-gyp</h2>
 
 				<aside class="notes">
@@ -360,13 +360,7 @@
 				</aside>
 			</section>
 
-			<section class="center">
-				<aside class="notes">
-					(next slide)
-				</aside>
-			</section>
-
-			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+			<section class="center" data-transition="slide-in slide-out" data-transition-speed="default">
 				<h2 class="no-text-transform">GYP</h2>
 
 				<aside class="notes">
@@ -393,7 +387,76 @@
 
 			<section class="center">
 				<aside class="notes">
-					So, aside from the aforementioned caveat, node-gyp more or less works, but this does not mean that developing native add-ons are not without difficulty.
+					Moving along, developing native add-ons has, historically, not been a smooth process.
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Challenges</h2>
+
+				<aside class="notes">
+					 Here have been some of the challenges.
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next-slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in slide-out" data-transition-speed="default">
+				<h2 class="no-text-transform">V8</h2>
+
+				<aside class="notes">
+					<p>
+						The foremost challenge has been handling breaking changes in V8.
+					</p>
+    				<p>
+    					For example, each Node.js major release entailed a new V8. In the past, the V8 team was not concerned about backward compatibility and would often introduce sweeping changes, removing, replacing, and adding interfaces and functionality. These changes would force add-on authors to effectively rewrite their packages, publish a semver major, and make providing backward compatibility extremely difficult.
+    				</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in slide-out" data-transition-speed="default">
+				<h2 class="no-text-transform">NAN</h2>
+
+				<aside class="notes">
+					<p>
+     					To alleviate some of the "pain" of native add-ons, members of the Node.js community created a package NAN, which stands for native abstractions for Node.js.
+     				</p>
+     				<p>
+     					NAN attempts to provide a stable abstraction layer that native add-ons authors could target. Internally, NAN handles the complex logic required to maintain functionality from one V8 version to the next.
+     				</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in slide-out" data-transition-speed="default">
+				<h2 class="no-text-transform">GYP</h2>
+
+				<aside class="notes">
+					<p>
+    					Another issue is GYP. GYP was designed with a particular use case in mind: Chrome. It was not designed with Node.js add-ons in mind.
+    				</p>
+    				<p>
+    					Further, GYP documentation is either poor or incomplete, presenting significant challenges whenever you want to do something beyond simple "hello world" type examples.
+    				</p>
+    				<p>
+    					To make up for a lack of documentation, you end up scouring the Internet looking for other projects using GYP and seeing how those projects handle special configurations. And in particular, anytime you want to break out of the confines of C/C++, say, to compile Fortran or Cuda, good luck.
+    				</p>
+    				<p>
+    					Resources are few and far between.
+    				</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in slide-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Engine Bias</h2>
+
+				<aside class="notes">
+					<p>
+    					A more forward looking concern is that node-gyp is biased toward V8. Meaning the toolchain is not engine neutral. This means compiling Node.js and Node.js native add-ons with alternative engines, such as Chakra, is less straightforward, requiring shims like Chakrashim.
+					</p>
 				</aside>
 			</section>
 
