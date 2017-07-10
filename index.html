@@ -576,7 +576,7 @@ namespace addon_hypot {
     using v8::Local;
     using v8::Value;
 
-    void node_hypot( const FunctionCallbackInfo<Value>&amp; info ) {
+    void node_hypot( const FunctionCallbackInfo&lt;Value&gt;&amp; info ) {
         if ( info.Length() != 2 ) {
             ThrowError( "invalid invocation. Must provide 2 arguments." );
             return;
