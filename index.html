@@ -220,7 +220,7 @@
 					</p>
      				<ul>
      					<li>
-     						V8: C++ library which provides runs JavaScript. Allows creating objects, calling functions, etc.
+     						V8: C++ library which runs JavaScript. Allows creating objects, calling functions, etc.
      					</li>
      					<li>
      						libuv: C library which implements the Node.js event loop, worker threads, and async behavior. Allows interacting with the filesystem, sockets, timers, and system events.
@@ -368,7 +368,7 @@
      					GYP, generate your project, is a meta-build system, which builds other build systems, depending on the target platform.
      				</p>
      				<p>
-     					The aim of GYP is to replicate, as closely as possible, the native build setup of a target platform IDE. So, for example, on MacOS, that means generating XCode projects, etc. Or on Windows, Visual Studio projects.
+     					The aim of GYP is to replicate, as closely as possible, the native build setup of a target platform IDE. So, for example, on MacOS, that means generating XCode projects. Or on Windows, Visual Studio projects.
      				</p>
      				<p>
 						And once GYP generates the build system, we can compile our add-on.
@@ -414,13 +414,13 @@
 						The foremost challenge has been handling breaking changes in V8.
 					</p>
     				<p>
-    					For example, each Node.js major release entailed a new V8. In the past, the V8 team was not concerned about backward compatibility and would often introduce sweeping changes, removing, replacing, and adding interfaces and functionality. These changes would force add-on authors to effectively rewrite their packages, publish a semver major, and make providing backward compatibility extremely difficult.
+    					Each Node.js major release entailed a new V8. In the past, the V8 team was not concerned about backward compatibility and would often introduce sweeping changes, removing, replacing, and adding interfaces and functionality. These changes would force add-on authors to effectively rewrite their packages, publish a semver major, and make providing backward compatibility extremely difficult.
     				</p>
 					<p>
-     					To alleviate some of the "pain" of native add-ons, members of the Node.js community created a package NAN, which stands for native abstractions for Node.js.
+     					To alleviate some of the "pain" of native add-ons, members of the Node.js community created a package NAN, which stands for Native Abstractions for Node.js.
      				</p>
      				<p>
-     					NAN attempts to provide a stable abstraction layer that native add-ons authors could target. Internally, NAN handles the complex logic required to maintain functionality from one V8 version to the next.
+     					NAN attempts to provide a stable abstraction layer that native add-on authors can target. Internally, NAN handles the complex logic required to maintain functionality from one V8 version to the next.
      				</p>
      				<p>
      					And while NAN has been beneficial, even it has caused churn due to breaking changes in its API while attempting to smooth the transition from one V8 version to the next.
@@ -460,7 +460,7 @@
    						What you find when combing through the implementations of Julia, R, and Python libraries like NumPy and SciPy is that a substantial amount of the functionality they expose relies on providing wrappers for existing numeric computing code bases written in C/C++ and Fortran.
    					</p>
    					<p>
-   						For example, for high-performance linear algebra, these platforms wrap BLAS and LAPACK. For fast Fourier transforms, they wrap FFTW. For BigInt, Julia wraps GMP. For BigFloat, Julia wraps MPFR.
+   						For example, for high-performance linear algebra, these platforms wrap BLAS and LAPACK. For fast Fourier transforms, they wrap FFTW. In the particular case of Julia, for BigInt, Julia wraps GMP. For BigFloat, Julia wraps MPFR.
    					</p>
    					<p>
    						Node.js native add-ons allow us to do something similar as these other platforms; namely, expose high-performance numeric computing functionality to Node.js and to JavaScript.
@@ -476,15 +476,88 @@
 
 			<section class="center">
 				<aside class="notes">
-					At this point, we have discussed, at a high-level, what native add-ons are, their toolchain, some challenges, and motivated why they are important for numeric computing. Let's now make things a bit more concrete by working through a basic example...
+					At this point, we have discussed, at a high-level, what native add-ons are, their toolchain, some challenges, and motivated why they are important for numeric computing. Let's now make things a bit more concrete by walking through a basic example...
 				</aside>
 			</section>
 
-			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+			<section class="center" data-transition="fade-in slide-out" data-transition-speed="default">
 				<h2 class="no-text-transform">Basic Example</h2>
 
 				<aside class="notes">
 
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs c" contenteditable>
+/* hypot.h */
+#ifndef C_HYPOT_H
+#define C_HYPOT_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+double c_hypot( const double x, const double y );
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						We first define a basic header file defining the interface to the function exported to the JavaScript runtime, taking care to guard against name mangling and ensuring similar behavior as might be observed when using a standard C compiler.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs c" contenteditable>
+/* hypot.c */
+#include &lt;math.h&gt;
+#include "hypot.h"
+
+double c_hypot( const double x, const double y ) {
+    double tmp;
+    double a;
+    double b;
+    if ( isnan( x ) || isnan( y ) ) {
+        return NAN;
+    }
+    if ( isinf( x ) || isinf( y ) ) {
+        return INFINITY;
+    }
+    a = x;
+    b = y;
+    if ( a &lt; 0.0 ) {
+        a = -a;
+    }
+    if ( b &lt; 0.0 ) {
+        b = -b;
+    }
+    if ( a &lt; b ) {
+        tmp = b;
+        b = a;
+        a = tmp;
+    }
+    if ( a == 0.0 ) {
+        return 0.0;
+    }
+    b /= a;
+    return a * sqrt( 1.0 + (b*b) );
+}
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Next, we write our implementation. In this example, we are computing the hypotenuse, guarding against overflow and underflow.
+					</p>
+					<p>
+						This is a standard C implementation which imports the standard math library and includes a function which accepts two arguments, x and y, and returns a numeric result.
+					</p>
 				</aside>
 			</section>
 
