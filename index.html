@@ -1087,6 +1087,220 @@ $ gcc -o dasum dasum_f.o dasumsub.o dasum_f.o -lgfortran
 			</section>
 
 			<section class="center">
+				<pre><code class="hljs yaml" contenteditable>
+# binding.gyp
+{
+  'variables': {
+    'addon_target_name%': 'addon',
+    'addon_output_dir': './src',
+    'fortran_compiler%': 'gfortran',
+    'fflags': [
+      '-std=f95',
+      '-ffree-form',
+      '-O3',
+      '-Wall',
+      '-Wextra',
+      '-Wimplicit-interface',
+      '-fno-underscoring',
+      '-pedantic',
+      '-c',
+    ],
+    'conditions': [
+      [
+        'OS=="win"',
+        {
+          'obj': 'obj',
+        },
+        {
+          'obj': 'o',
+        }
+      ],
+    ],
+  },
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						We begin by defining variables.
+					</p>
+					<p>
+						While GYP automatically sets C/C++ compiler flags, here we need to explicitly list Fortran compiler flags, as well as explicitly define the Fortran compiler we want to use.
+					</p>
+					<p>
+						And further, we define the object file suffix based on the host platform. This suffix will be used later when compiling Fortran using GYP.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs yaml" contenteditable>
+# binding.gyp (cont.)
+  'targets': [
+    {
+      'target_name': '&lt;(addon_target_name)',
+      'dependencies': [],
+      'include_dirs': [
+        '&lt;!(node -e "require(\'nan\')")',
+        '../include',
+      ],
+      'sources': [
+        'dasum.f',
+        'dasumsub.f',
+        'dasum_f.c',
+        'addon.cpp'
+      ],
+      'link_settings': {
+        'libraries': [
+          '-lgfortran',
+        ],
+        'library_dirs': [],
+      },
+      'cflags': [
+        '-Wall',
+        '-O3',
+      ],
+      'cflags_c': [
+        '-std=c99',
+      ],
+      'cflags_cpp': [
+        -std=c++11',
+      ],
+      'ldflags': [],
+      'conditions': [
+        [
+          'OS=="mac"',
+          {
+            'ldflags': [
+              '-undefined dynamic_lookup',
+              '-Wl,-no-pie',
+              '-Wl,-search_paths_first',
+            ],
+          },
+        ],
+        [
+          'OS!="win"',
+          {
+            'cflags': [
+              '-fPIC',
+            ],
+          },
+        ],
+      ],
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						After defining variables, we can begin defining targets.
+					</p>
+					<p>
+						Similar to before, we define the target name, this time using variable expansion, and list the source files to compile.
+					</p>
+					<p>
+						We then define various command-line flags depending on the host platform.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs yaml" contenteditable>
+# binding.gyp (cont.)
+      'rules': [
+        {
+          'extension': 'f',
+          'inputs': [
+            '&lt;(RULE_INPUT_PATH)'
+          ],
+          'outputs': [
+            '&lt;(INTERMEDIATE_DIR)/&lt;(RULE_INPUT_ROOT).&lt;(obj)'
+          ],
+          'conditions': [
+            [
+              'OS=="win"',
+              {
+                'rule_name': 'compile_fortran_windows',
+                'process_outputs_as_sources': 0,
+                'action': [
+                  '&lt;(fortran_compiler)',
+                  '&lt;@(fflags)',
+                  '&lt;@(_inputs)',
+                  '-o',
+                  '&lt;@(_outputs)',
+                ],
+              },
+              {
+                'rule_name': 'compile_fortran_linux',
+                'process_outputs_as_sources': 1,
+                'action': [
+                  '&lt;(fortran_compiler)',
+                  '&lt;@(fflags)',
+                  '-fPIC',
+                  '&lt;@(_inputs)',
+                  '-o',
+                  '&lt;@(_outputs)',
+                ],
+              }
+            ],
+          ],
+        },
+      ],
+    },
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						In order to compile the Fortran files, we have to tell GYP how to process them, and we do so by defining a <strong>rule</strong> which is triggered based on a file's file extension.
+					</p>
+					<p>
+						We explicitly specify the input and output arguments which will be subsequently used in command execution using GYP defined variables.
+					</p>
+					<p>
+						Next, we define the <strong>action</strong> to take (i.e., the compile command to invoke) based on the target platform.
+					</p>
+					<p>
+						Now, when GYP goes to create the add-on target, it will compile Fortran files using the specified Fortran compiler and flags.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs yaml" contenteditable>
+# binding.gyp (cont.)
+    {
+      'target_name': 'copy_addon',
+      'type': 'none',
+      'dependencies': [
+        '&lt;(addon_target_name)',
+      ],
+      'actions': [
+        {
+          'action_name': 'copy_addon',
+          'inputs': [],
+          'outputs': [
+            '&lt;(addon_output_dir)/&lt;(addon_target_name).node',
+          ],
+          'action': [
+            'cp',
+            '&lt;(PRODUCT_DIR)/&lt;(addon_target_name).node',
+            '&lt;(addon_output_dir)/&lt;(addon_target_name).node',
+          ],
+        },
+      ],
+    },
+  ],
+}
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Lastly, we add one more target to our <code>binding.gyp</code> file, and the purpose of this target is to move the compile add-on to a standard location.
+					</p>
+					<p>
+						The main takeaway here is that GYP supports target dependencies. Here, the <code>copy_addon</code> target will not occur until <strong>after</strong> the add-on has been compiled. For those familiar with <i>make</i>, this is similar to Makefile prerequisites.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
 				<pre><code class="hljs fortran" contenteditable>
 
 				</code></pre>
