@@ -932,7 +932,6 @@ double c_dasum( const int N, const double *X, const int stride );
 #endif
 
 #endif
-
 				</code></pre>
 
 				<aside class="notes">
@@ -949,9 +948,9 @@ double c_dasum( const int N, const double *X, const int stride );
 #include "dasum_fortran.h"
 
 double c_dasum( const int N, const double *X, const int stride ) {
-	double sum;
-	dasumsub( &amp;N, X, &amp;stride, &amp;sum );
-	return sum;
+    double sum;
+    dasumsub( &amp;N, X, &amp;stride, &amp;sum );
+    return sum;
 }
 				</code></pre>
 
@@ -970,41 +969,41 @@ double c_dasum( const int N, const double *X, const int stride ) {
 
 namespace addon_dasum {
 
-	using Nan::FunctionCallbackInfo;
-	using Nan::TypedArrayContents;
-	using Nan::ThrowTypeError;
-	using Nan::ThrowError;
-	using v8::Number;
-	using v8::Local;
-	using v8::Value;
+    using Nan::FunctionCallbackInfo;
+    using Nan::TypedArrayContents;
+    using Nan::ThrowTypeError;
+    using Nan::ThrowError;
+    using v8::Number;
+    using v8::Local;
+    using v8::Value;
 
-	void node_dasum( const FunctionCallbackInfo&lt;Value&gt;&amp; info ) {
-		if ( info.Length() != 3 ) {
-			ThrowError( "invalid invocation. Must provide 3 arguments." );
-			return;
-		}
-		if ( !info[ 0 ]-&gt;IsNumber() ) {
-			ThrowTypeError( "invalid input argument. First argument must be a number." );
-			return;
-		}
-		if ( !info[ 2 ]-&gt;IsNumber() ) {
-			ThrowTypeError( "invalid input argument. Third argument must be a number." );
-			return;
-		}
-		const int N = info[ 0 ]-&gt;Uint32Value();
-		const int stride = info[ 2 ]-&gt;Uint32Value();
+    void node_dasum( const FunctionCallbackInfo&lt;Value&gt;&amp; info ) {
+        if ( info.Length() != 3 ) {
+            ThrowError( "invalid invocation. Must provide 3 arguments." );
+            return;
+        }
+        if ( !info[ 0 ]-&gt;IsNumber() ) {
+            ThrowTypeError( "invalid input argument. First argument must be a number." );
+            return;
+        }
+        if ( !info[ 2 ]-&gt;IsNumber() ) {
+            ThrowTypeError( "invalid input argument. Third argument must be a number." );
+            return;
+        }
+        const int N = info[ 0 ]-&gt;Uint32Value();
+        const int stride = info[ 2 ]-&gt;Uint32Value();
 
-		TypedArrayContents&lt;double&gt; X( info[ 1 ] );
+        TypedArrayContents&lt;double&gt; X( info[ 1 ] );
 
-		Local&lt;Number&gt; sum = Nan::New( c_dasum( N, *X, stride ) );
-		info.GetReturnValue().Set( sum );
-	}
+        Local&lt;Number&gt; sum = Nan::New( c_dasum( N, *X, stride ) );
+        info.GetReturnValue().Set( sum );
+    }
 
-	NAN_MODULE_INIT( Init ) {
-		Nan::Export( target, "dasum", node_dasum );
-	}
+    NAN_MODULE_INIT( Init ) {
+        Nan::Export( target, "dasum", node_dasum );
+    }
 
-	NODE_MODULE( addon, Init )
+    NODE_MODULE( addon, Init )
 }
 				</code></pre>
 
@@ -1020,6 +1019,69 @@ namespace addon_dasum {
 					</p>
 					<p>
 						Once we have unwrapped our input arguments, we pass them our C function and set the return value.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs bash" contenteditable>
+$ gfortran \
+    -std=f95 \
+    -ffree-form \
+    -O3 \
+    -Wall \
+    -Wextra \
+    -Wimplicit-interface \
+    -fno-underscoring \
+    -pedantic \
+    -fPIC \
+    -c \
+    -o dasum.o \
+    dasum.f
+$ gfortran \
+    -std=f95 \
+    -ffree-form \
+    -O3 \
+    -Wall \
+    -Wextra \
+    -Wimplicit-interface \
+    -fno-underscoring \
+    -pedantic \
+    -fPIC \
+    -c \
+    -o dasumsub.o \
+    dasumsub.f
+$ gcc \
+    -std=c99 \
+    -O3 \
+    -Wall \
+    -pedantic \
+    -fPIC \
+    -I ../include \
+    -c \
+    -o dasum_f.o \
+    dasum_f.c
+$ gcc -o dasum dasum_f.o dasumsub.o dasum_f.o -lgfortran
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Compiling our add-on is <strong>not</strong> as straightforward, as before. Recall that I mentioned that GYP is oriented toward C/C++, and, here, we have to compile Fortran. Accordingly, we'll going to have to bend GYP to our will, and our configuration will become considerably more complex.
+					</p>
+					<p>
+						Forgetting the add-on for a second, if we were going to compile just the C and Fortran, we do something like the following.
+					</p>
+					<p>
+						First, we would need to compile our Fortran files, specifying various command-line options, including, depending on the platform, whether to generate position-independent code.
+					</p>
+					<p>
+						Next, we would compile our C files, once again specifying various command-line options.
+					</p>
+					<p>
+						After compiling our source files, we would link them together into a single library, making sure to include the standard Fortran libraries.
+					</p>
+					<p>
+						To compile our add-on, we will need to translate this sequence, or something similar, to a GYP configuration file.
 					</p>
 				</aside>
 			</section>
