@@ -1454,6 +1454,204 @@ double c_dasum( const int N, const double *X, const int stride ) {
 			</section>
 
 			<section class="center">
+				<pre><code class="hljs yaml" contenteditable>
+# binding.gyp
+{
+  'variables': {
+    'addon_target_name%': 'addon',
+    'addon_output_dir': './src',
+  },
+  'targets': [
+    {
+      'target_name': '&lt;(addon_target_name)',
+      'dependencies': [],
+      'include_dirs': [
+        # NAN absolute file path:
+        '&lt;!(node -e "require(\'nan\')")',
+        './../include',
+      ],
+      'sources': [
+        'dasum_cblas.c',
+        'addon.cpp'
+      ],
+      'link_settings': {
+        'libraries': [
+          '-lblas',
+        ],
+        'library_dirs': [],
+      },
+      'cflags': [
+        '-Wall',
+        '-O3',
+      ],
+      'cflags_c': [
+        '-std=c99',
+      ],
+      'cflags_cpp': [
+        '-std=c++11',
+      ],
+      'ldflags': [
+		'-undefined dynamic_lookup',
+        '-Wl,-no-pie',
+        '-Wl,-search_paths_first'
+      ],
+    },
+    {
+      'target_name': 'copy_addon',
+      'type': 'none',
+      'dependencies': [
+        '&lt;(addon_target_name)',
+      ],
+      'actions': [
+        {
+          'action_name': 'copy_addon',
+          'inputs': [],
+          'outputs': [
+            '&lt;(addon_output_dir)/&lt;(addon_target_name).node',
+          ],
+
+          # Define the command-line invocation:
+          'action': [
+            'cp',
+            '&lt;(PRODUCT_DIR)/&lt;(addon_target_name).node',
+            '&lt;(addon_output_dir)/&lt;(addon_target_name).node',
+          ],
+        },
+      ],
+    },
+  ],
+}
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						We can modify the <code>binding.gyp</code> file to no longer include configuration settings and rules for compiling Fortran files.
+					</p>
+					<p>
+						Instead, we specify the library we want to link to and update the source file list.
+					</p>
+					<p>
+						Building and compiling the add-on follows the same procedure as before.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in slide-out" data-transition-speed="default">
+				<table>
+					<thead>
+						<tr>
+							<th>Length</th>
+							<th>JavaScript</th>
+							<th>Native</th>
+							<th>Perf</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>10</td>
+							<td>22438020</td>
+							<td>7084870</td>
+							<td>0.31x</td>
+						</tr>
+						<tr>
+							<td>100</td>
+							<td>4350384</td>
+							<td>6428626</td>
+							<td>1.47x</td>
+						</tr>
+						<tr>
+							<td>1000</td>
+							<td>481417</td>
+							<td>3289090</td>
+							<td>6.83x</td>
+						</tr>
+						<tr>
+							<td>10000</td>
+							<td>28186</td>
+							<td>355172</td>
+							<td>12.60x</td>
+						</tr>
+						<tr>
+							<td>100000</td>
+							<td>1617</td>
+							<td>30058</td>
+							<td>18.58x</td>
+						</tr>
+						<tr>
+							<td>1000000</td>
+							<td>153</td>
+							<td>1850</td>
+							<td>12.09x</td>
+						</tr>
+					</tbody>
+				</table>
+				<aside class="notes">
+					<p>
+						When we benchmark the hardware optimized BLAS libraries against equivalent implementations in JavaScript, we get the following results.
+					</p>
+					<p>
+						As with the reference implementations, the add-on is slower for short array lengths.
+					</p>
+					<p>
+						However, as we increase the array length, the add-on achieves significantly better performance even for an array length of 100 and better performance across the board compared to the reference implementation.
+					</p>
+					<p>
+						The key takeaway from these results is to use a hardware optimized library where possible. These type of results are simply not achievable otherwise.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Challenges</h2>
+
+				<div class="row">
+					<ul class="column column-3">
+						&nbsp;
+					</ul>
+					<ul class="column column-8">
+						<li class="fragment">Bugs</li>
+						<li class="fragment">Standards</li>
+						<li class="fragment">Proprietary</li>
+						<li class="fragment">Windows</li>
+						<li class="fragment">Portability</li>
+						<li class="fragment">Complexity</li>
+					</ul>
+				</div>
+				<aside class="notes">
+					<p>
+						At this point, you may have gotten pretty excited seeing a 20x improvement. One small gotcha, however: detecting and/or installing hardware optimized libraries is hard.
+					</p>
+					<p>
+						The first problem is that some hardward optimized libraries are buggy, so you need to provide patches; e.g., Apple Accelerate Framework.
+					</p>
+					<p>
+						Next, resolving the installation locations in a robust cross-platform way is difficult, as no standard location or naming convention exist.
+					</p>
+					<p>
+						Third, some hardware optimized libraries are proprietary and cannot be guaranteed to exist on a given target platform.
+					</p>
+					<p>
+						Fourth, hardware optimized BLAS on Windows is especially painful. And in fact, Fortran BLAS is painful on Windows, in general, and node-gyp cannot compile Fortran on Windows due to its dependency on Microsoft Visual Studio, which does not include a Fortran compiler.
+					</p>
+					<p>
+						Fifth, while OpenBLAS is close, there is no fully robust and fully cross-platform hardware optimized BLAS library that you can install alongside your add-on.
+					</p>
+					<p>
+						...which means that you always need to ship a reference implementation fallback, and, for those environments where you cannot compile your native add-on, you also need to ship a pure JavaScript fallback.
+					</p>
+					<p>
+						In short, to handle platform complexity, your <code>binding.gyp</code> file gets nasty quickly.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
 				<aside class="notes">
 					(next slide)
 				</aside>
