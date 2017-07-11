@@ -1301,6 +1301,21 @@ $ gcc -o dasum dasum_f.o dasumsub.o dasum_f.o -lgfortran
 			</section>
 
 			<section class="center">
+				<pre><code class="hljs bash" contenteditable>
+$ cd path/to/dasum/binding.gyp
+$ node-gyp configure
+# node-gyp configure --msvs_version=2015
+$ node-gyp build
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Similar to <code>hypot</code>, to build the add-on, we navigate to the add-on directory containing the <code>binding.gyp</code> file, generate the build files using the <i>configure</i> subcommand, and run <i>build</i> to compile the add-on.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
 				<pre><code class="hljs javascript" contenteditable>
 /* dasum.js */
 var dasum = require( './path/to/src/addon.node' ).dasum;
