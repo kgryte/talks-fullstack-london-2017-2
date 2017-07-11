@@ -963,6 +963,68 @@ double c_dasum( const int N, const double *X, const int stride ) {
 			</section>
 
 			<section class="center">
+				<pre><code class="hljs cpp" contenteditable>
+/* addon.cpp */
+#include &lt;nan.h&gt;
+#include "dasum.h"
+
+namespace addon_dasum {
+
+	using Nan::FunctionCallbackInfo;
+	using Nan::TypedArrayContents;
+	using Nan::ThrowTypeError;
+	using Nan::ThrowError;
+	using v8::Number;
+	using v8::Local;
+	using v8::Value;
+
+	void node_dasum( const FunctionCallbackInfo&lt;Value&gt;&amp; info ) {
+		if ( info.Length() != 3 ) {
+			ThrowError( "invalid invocation. Must provide 3 arguments." );
+			return;
+		}
+		if ( !info[ 0 ]-&gt;IsNumber() ) {
+			ThrowTypeError( "invalid input argument. First argument must be a number." );
+			return;
+		}
+		if ( !info[ 2 ]-&gt;IsNumber() ) {
+			ThrowTypeError( "invalid input argument. Third argument must be a number." );
+			return;
+		}
+		const int N = info[ 0 ]-&gt;Uint32Value();
+		const int stride = info[ 2 ]-&gt;Uint32Value();
+
+		TypedArrayContents&lt;double&gt; X( info[ 1 ] );
+
+		Local&lt;Number&gt; sum = Nan::New( c_dasum( N, *X, stride ) );
+		info.GetReturnValue().Set( sum );
+	}
+
+	NAN_MODULE_INIT( Init ) {
+		Nan::Export( target, "dasum", node_dasum );
+	}
+
+	NODE_MODULE( addon, Init )
+}
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Now that we have our C interface, we can create our add-on wrapper.
+					</p>
+					<p>
+						Similar to before, we use NAN, which abstracts away the differences between V8 versions.
+					</p>
+					<p>
+						And similar to before, we perform some basic input argument sanity checks before unwrapping input values. One thing to note is that we need to re-purpose the underlying TypedArray buffer as a C vector. This can be a relatively expensive operation, where, for small vectors, the operation can be effectively rate-limiting.
+					</p>
+					<p>
+						Once we have unwrapped our input arguments, we pass them our C function and set the return value.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
 				<pre><code class="hljs fortran" contenteditable>
 
 				</code></pre>
