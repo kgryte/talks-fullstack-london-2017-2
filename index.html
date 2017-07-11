@@ -95,6 +95,7 @@
 				<aside class="notes">
 					<ul>
 						<li>Who here has heard of Node.js native add-ons?</li>
+						<li>Anyone here hearing about Node.js native add-ons for the first time?</li>
 						<li>Who here has written a native add-on?</li>
 						<li>Who here has used a Node.js native add-on for numeric computing?</li>
 					</ul>
@@ -615,7 +616,7 @@ namespace addon_hypot {
 						Most of the C++ is unwrapping and wrapping object values. The function wrapper takes a single argument: the arguments object. We do some basic input value sanity checks and then proceed to unwrap the individual arguments x and y. Once we have x and y, we call our C function and set the return value.
 					</p>
 					<p>
-						And finally, we end by exporting an initialization, which is required of all Node.js native add-ons.
+						And finally, we end by exporting an initialization function, which is required of all Node.js native add-ons.
 					</p>
 					<p>
 						I should note that we did not have to write the implementation in a separate C file. We could have written in directly in our add-on file; however, using a separate file a) facilitates re-usability of source files in non-add-on contexts and b) is a more common scenario when working with existing codebases.
@@ -624,7 +625,7 @@ namespace addon_hypot {
 			</section>
 
 			<section class="center">
-				<pre><code class="hljs c" contenteditable>
+				<pre><code class="hljs yaml" contenteditable>
 # binding.gyp
 {
   'targets': [
@@ -711,6 +712,58 @@ var h = hypot( 5.0, 12.0 );
 					</p>
 					<p>
 						When invoked, this function behaves just like a comparable function implemented in JavaScript, accepting numeric arguments and returning a number.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in slide-out" data-transition-speed="default">
+				<table>
+					<thead>
+						<tr>
+							<th></th>
+							<th>ops/sec</th>
+							<th>perf</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Builtin</td>
+							<td>3954799</td>
+							<td>1x</td>
+						</tr>
+						<tr>
+							<td>Native</td>
+							<td>4732108</td>
+							<td>1.2x</td>
+						</tr>
+						<tr>
+							<td>JavaScript</td>
+							<td>7337790</td>
+							<td>1.85x</td>
+						</tr>
+					</tbody>
+				</table>
+				<aside class="notes">
+					<p>
+						Okay, so we have implemented our add-on and we're ready to use it, but we should ask ourselves: how does the performance compare to an implementation written purely in JavaScript?
+					</p>
+					<p>
+						Here are benchmark results run on my laptop running Node.js version 8 which is using one of the latest versions of V8.
+					</p>
+					<p>
+						In the first row, I am showing the results for the builtin <code>hypot</code> function provided by the JavaScript standard math library. We see that, on my machine, we can compute the hypotenuse around 4 million times per second.
+					</p>
+					<p>
+						On the next row, I am showing the results of our native add-on. We see that we get a slight performance boost of around 800,000 operations per second.
+					</p>
+					<p>
+						I should note that comparing our add-on implementation to the builtin <code>hypot</code> is not strictly apples to apples, as the builtin function is variadic and polymorphic, while our add-on only accepts two numeric arguments. However, showing the performance of the builtin method is useful for establishing baseline performance.
+					</p>
+					<p>
+						Lastly, on the third row, I am showing the results of an equivalent implementation written purely in JavaScript. We can see that, when compared to add-on performance, we can perform 2.5 million more operations per second, which is a significant performance boost.
+					</p>
+					<p>
+						Two takeaways. First, simply because we can write code in C, this does not mean we will better performance by doing so due to overhead when calling into an add-on. Second, simply because something is a standard, this does not mean the function is fast, in an absolute sense. You can often achieve better performance in JavaScript via userland implementations by restricting the domain of input argument types and choosing your algorithms wisely.
 					</p>
 				</aside>
 			</section>
