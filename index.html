@@ -778,10 +778,82 @@ var h = hypot( 5.0, 12.0 );
 			</section>
 
 			<section class="center" data-transition="fade-in slide-out" data-transition-speed="default">
-				<h2 class="no-text-transform">BLAS</h2>
+				<h2 class="no-text-transform"><a title="BLAS" href="http://www.netlib.org/blas/">BLAS</a></h2>
 
 				<aside class="notes">
+					<p>
+						<a title="BLAS" href="http://www.netlib.org/blas/">BLAS</a>, or Basic Linear Algebra Subprograms, are routines that provide standard building blocks for performing basic vector and matrix operations.
+					</p>
+					<p>
+						BLAS routines are split into three levels. Level 1 BLAS routines perform scalar, vector and vector-vector operations. Level 2 BLAS routines perform matrix-vector operations. Level 3 BLAS routines perform matrix-matrix operations.
+					</p>
+					<p>
+						BLAS routines are commonly used in the development of high quality linear algebra software (e.g., LAPACK) due to their efficiency, portability, and wide availability. And they form part of the bedrock of most modern numeric computing environments.
+					</p>
+				</aside>
+			</section>
 
+			<section class="center">
+				<pre><code class="hljs fortran" contenteditable>
+! dasum.f
+! Computes the sum of absolute values.
+double precision function dasum( N, dx, stride )
+  implicit none
+  integer :: stride, N
+  double precision :: dx(*)
+  double precision :: dtemp
+  integer :: nstride, mp1, m, i
+  intrinsic dabs, mod
+  ! ..
+  dasum = 0.0d0
+  dtemp = 0.0d0
+  ! ..
+  if ( N &lt;= 0 .OR. stride &lt;= 0 ) then
+    return
+  end if
+  ! ..
+  if ( stride == 1 ) then
+    m = mod( N, 6 )
+    if ( m /= 0 ) then
+      do i = 1, m
+        dtemp = dtemp + dabs( dx( i ) )
+      end do
+      if ( N &lt; 6 ) then
+        dasum = dtemp
+        return
+      end if
+    end if
+    mp1 = m + 1
+    do i = mp1, N, 6
+      dtemp = dtemp + &amp;
+        dabs( dx( i ) ) + dabs( dx( i+1 ) ) + &amp;
+        dabs( dx( i+2 ) ) + dabs( dx( i+3 ) ) + &amp;
+        dabs( dx( i+4 ) ) + dabs( dx( i+5 ) )
+    end do
+  else
+    nstride = N * stride
+    do i = 1, nstride, stride
+      dtemp = dtemp + dabs( dx( i ) )
+    end do
+  end if
+  dasum = dtemp
+  return
+end function dasum
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						An example BLAS routine is the Level 1 function <code>dasum</code>, which stands for double absolute value sum. As suggested by the name, the function computes the sum of absolute values for a vector whose values are of type <code>double</code>.
+					</p>
+					<p>
+						The algorithm is not particularly interesting, but should suffice in providing an illustrative example as to how we might expose this or a similar function to JavaScript.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
 				</aside>
 			</section>
 
