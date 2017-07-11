@@ -1367,7 +1367,18 @@ var s = dasum( x.length, x, 1 );
 					</tbody>
 				</table>
 				<aside class="notes">
-
+					<p>
+						To measure add-on performance, we benchmark against an equivalent implementation written in plain JavaScript. Each row in the table corresponds to an input array length. The two middle columns correspond to operations per second. And the Last column is the relative performance of the native add-on to the JavaScript implementation.
+					</p>
+					<p>
+						As we can see, for small arrays, JavaScript is significantly faster, but that advantage disappears as soon as we reach an input array having 100 elements.
+					</p>
+					<p>
+						As I alluded to earlier, array unwrapping and reinterpretation as a C vector can have a significant impact on performance for small arrays. However, that cost is largely fixed, becoming negligible as array length increases.
+					</p>
+					<p>
+						For large input arrays, the add-on is significantly more performant, nearly 6x of the equivalent JavaScript implementation.
+					</p>
 				</aside>
 			</section>
 
