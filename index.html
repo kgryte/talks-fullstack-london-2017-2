@@ -1625,7 +1625,7 @@ double c_dasum( const int N, const double *X, const int stride ) {
 				</div>
 				<aside class="notes">
 					<p>
-						At this point, you may have gotten pretty excited seeing a 20x improvement. One small gotcha, however: detecting and/or installing hardware optimized libraries is hard.
+						At this point, you be pretty excited seeing a 20x improvement. One small gotcha, however: detecting and/or installing hardware optimized libraries is hard.
 					</p>
 					<p>
 						The first problem is that some hardward optimized libraries are buggy, so you need to provide patches; e.g., Apple Accelerate Framework.
@@ -1646,7 +1646,7 @@ double c_dasum( const int N, const double *X, const int stride ) {
 						...which means that you always need to ship a reference implementation fallback, and, for those environments where you cannot compile your native add-on, you also need to ship a pure JavaScript fallback.
 					</p>
 					<p>
-						In short, to handle platform complexity, your <code>binding.gyp</code> file gets nasty quickly.
+						In short, to handle cross-platform complexity, your <code>binding.gyp</code> file gets nasty quickly.
 					</p>
 				</aside>
 			</section>
