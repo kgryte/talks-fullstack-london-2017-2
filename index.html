@@ -852,6 +852,94 @@ end function dasum
 			</section>
 
 			<section class="center">
+				<pre><code class="hljs fortran" contenteditable>
+! dasumsub.f
+! Wraps dasum as a subroutine.
+subroutine dasumsub( N, dx, stride, sum )
+  implicit none
+  ! ..
+  interface
+    double precision function dasum( N, dx, stride )
+      integer :: stride, N
+      double precision :: dx(*)
+    end function dasum
+  end interface
+  ! ..
+  integer :: stride, N
+  double precision :: sum
+  double precision :: dx(*)
+  ! ..
+  sum = dasum( N, dx, stride )
+  return
+end subroutine dasumsub
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Recall that Node.js native add-ons are intended to providing C/C++ bindings. In which case, the first thing we need to do is provide a C interface to the Fortran function.
+					</p>
+					<p>
+						The first obstacle in doing so is that we cannot use <code>dasum</code> directly from C because Fortran expects arguments to be passed by reference rather than by value. Furthermore, while not applicable here, Fortran functions can only return scalar values, not arrays. Thus, the general best practice is to wrap Fortran functions as subroutines (equivalent of a C function returning <code>(void)</code>), where we can pass a pointer for storing the output return value.
+					</p>
+					<p>
+						In which case, the first thing we have to do is wrap our Fortran function as a Fortran subroutine.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs c" contenteditable>
+/* dasum_fortran.h */
+#ifndef DASUM_FORTRAN_H
+#define DASUM_FORTRAN_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void dasumsub( const int *, const double *, const int *, double * );
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Similar to our <code>hypot</code> example, we create a header file defining the subroutine prototype.
+					<p>
+						If compiled as C++, we prevent name mangling so that the compiler emits a binary file having undecorated names, thus mirroring the behavior of a C/Fortran compiler, where we note that a Fortran compiler must be configured to not attach underscores.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs fortran" contenteditable>
+
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs fortran" contenteditable>
+
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
 				<aside class="notes">
 					(next slide)
 				</aside>
