@@ -1401,6 +1401,41 @@ var s = dasum( x.length, x, 1 );
 			</section>
 
 			<section class="center">
+				<pre><code class="hljs c" contenteditable>
+/* dasum_cblas.h */
+#ifndef DASUM_CBLAS_H
+#define DASUM_CBLAS_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+double cblas_dasum( const int N, const double *X, const int stride );
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Our BLAS journey is not, however, over. The Fortran reference does not take into account hardware capabilities or chip architecture and, thus, is not the most performant.
+					</p>
+					<p>
+						For optimal performance, we would rather default to hardware optimized BLAS libraries, if available. For instance, on Macs, we could use the Apple Accelerate Framework. On Intel chips, we could use Intel's Math Kernel Library (MKL). For a cross-platform hardware optimized library, we could use OpenBLAS.
+					</p>
+					<p>
+						As an example, if we wanted to use the Apple Accelerate Framework, we could proceed as follows.
+					</p>
+					<p>
+						First, we need to create a header file defining the prototype of the function we want to use. The function signature is the same, as before, but now we are using the CBLAS naming convention.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
 				<aside class="notes">
 					(next slide)
 				</aside>
