@@ -691,6 +691,31 @@ $ node-gyp build
 			</section>
 
 			<section class="center">
+				<pre><code class="hljs javascript" contenteditable>
+/* hypot.js */
+var hypot = require( './path/to/build/Release/addon.node' ).hypot;
+
+var h = hypot( 5.0, 12.0 );
+// returns 13.0
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						After compiling an add-on, we can use the exported function in JavaScript.
+					</p>
+					<p>
+						By default, <code>node-gyp</code> outputs the compiled file to a <code>Release</code> subdirectory within a directory named <code>build</code>.
+					</p>
+					<p>
+						As may be observed in the <code>require</code> statement, the add-on exports an object with a <code>hypot</code> method, as defined when we wrote our <code>addon.cpp</code> file.
+					</p>
+					<p>
+						When invoked, this function behaves just like a comparable function implemented in JavaScript, accepting numeric arguments and returning a number.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
 				<aside class="notes">
 					(next slide)
 				</aside>
