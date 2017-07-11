@@ -1018,7 +1018,7 @@ namespace addon_dasum {
 						And similar to before, we perform some basic input argument sanity checks before unwrapping input values. One thing to note is that we need to re-purpose the underlying TypedArray buffer as a C vector. This can be a relatively expensive operation, where, for small vectors, the operation can be effectively rate-limiting.
 					</p>
 					<p>
-						Once we have unwrapped our input arguments, we pass them our C function and set the return value.
+						Once we have unwrapped our input arguments, we pass them to our C function and set the return value.
 					</p>
 				</aside>
 			</section>
@@ -1066,7 +1066,7 @@ $ gcc -o dasum dasum_f.o dasumsub.o dasum_f.o -lgfortran
 
 				<aside class="notes">
 					<p>
-						Compiling our add-on is <strong>not</strong> as straightforward, as before. Recall that I mentioned that GYP is oriented toward C/C++, and, here, we have to compile Fortran. Accordingly, we'll going to have to bend GYP to our will, and our configuration will become considerably more complex.
+						Compiling our add-on is <strong>not</strong> as straightforward as before. Recall that I mentioned that GYP is oriented toward C/C++, and, here, we have to compile Fortran. Accordingly, we'll going to have to bend GYP to our will, and our configuration will become considerably more complex.
 					</p>
 					<p>
 						Forgetting the add-on for a second, if we were going to compile just the C and Fortran, we do something like the following.
@@ -1383,7 +1383,7 @@ var s = dasum( x.length, x, 1 );
 				</table>
 				<aside class="notes">
 					<p>
-						To measure add-on performance, we benchmark against an equivalent implementation written in plain JavaScript. Each row in the table corresponds to an input array length. The two middle columns correspond to operations per second. And the Last column is the relative performance of the native add-on to the JavaScript implementation.
+						To measure add-on performance, we benchmark against an equivalent implementation written in plain JavaScript. Each row in the table corresponds to an input array length. The two middle columns correspond to operations per second. And the last column is the relative performance of the native add-on to the JavaScript implementation.
 					</p>
 					<p>
 						As we can see, for small arrays, JavaScript is significantly faster, but that advantage disappears as soon as we reach an input array having 100 elements.
@@ -1421,7 +1421,7 @@ double cblas_dasum( const int N, const double *X, const int stride );
 
 				<aside class="notes">
 					<p>
-						Our BLAS journey is not, however, over. The Fortran reference does not take into account hardware capabilities or chip architecture and, thus, is not the most performant.
+						Our BLAS journey is not, however, over. The Fortran reference implementation does not take into account hardware capabilities or chip architecture and, thus, is not the most performant.
 					</p>
 					<p>
 						For optimal performance, we would rather default to hardware optimized BLAS libraries, if available. For instance, on Macs, we could use the Apple Accelerate Framework. On Intel chips, we could use Intel's Math Kernel Library (MKL). For a cross-platform hardware optimized library, we could use OpenBLAS.
@@ -1587,7 +1587,7 @@ double c_dasum( const int N, const double *X, const int stride ) {
 						When we benchmark the hardware optimized BLAS libraries against equivalent implementations in JavaScript, we get the following results.
 					</p>
 					<p>
-						As with the reference implementations, the add-on is slower for short array lengths.
+						As with the reference implementation, the add-on is slower for short array lengths.
 					</p>
 					<p>
 						However, as we increase the array length, the add-on achieves significantly better performance even for an array length of 100 and better performance across the board compared to the reference implementation.
@@ -1622,7 +1622,7 @@ double c_dasum( const int N, const double *X, const int stride ) {
 				</div>
 				<aside class="notes">
 					<p>
-						At this point, you be pretty excited seeing a 20x improvement. One small gotcha, however: detecting and/or installing hardware optimized libraries is hard.
+						At this point, you may be pretty excited seeing a 20x improvement. One small gotcha, however: detecting and/or installing hardware optimized libraries is hard.
 					</p>
 					<p>
 						The first problem is that some hardward optimized libraries are buggy, so you need to provide patches; e.g., Apple Accelerate Framework.
@@ -1634,7 +1634,7 @@ double c_dasum( const int N, const double *X, const int stride ) {
 						Third, some hardware optimized libraries are proprietary and cannot be guaranteed to exist on a given target platform.
 					</p>
 					<p>
-						Fourth, hardware optimized BLAS on Windows is especially painful. And in fact, Fortran BLAS is painful on Windows, in general, and node-gyp cannot compile Fortran on Windows due to its dependency on Microsoft Visual Studio, which does not include a Fortran compiler.
+						Fourth, hardware optimized BLAS on Windows is especially painful. And in fact, Fortran BLAS is painful on Windows, in general, and node-gyp cannot compile Fortran on Windows due to node-gyp's dependency on Microsoft Visual Studio, which does not include a Fortran compiler.
 					</p>
 					<p>
 						Fifth, while OpenBLAS is close, there is no fully robust and fully cross-platform hardware optimized BLAS library that you can install alongside your add-on.
@@ -1674,7 +1674,7 @@ double c_dasum( const int N, const double *X, const int stride ) {
    						Just two problems. First, we don't want to have to download all of BLAS in order to build a package exporting a single function. And we certainly don't want to ship all of BLAS with each individual package, as that could lead to a massive amount of duplicated code being sent over the wire.
    					</p>
    					<p>
-   						Second, this solution does not scale. If your add-on depends on 10 functions, each from a different monolithic libraries, then you would have to download and install 10 different monolithic libraries for each build (intelligent caching aside).
+   						Second, this solution does not scale. If your add-on depends on 10 functions, each from a different monolithic library, then you would have to download and install 10 different monolithic libraries for each build (intelligent caching aside).
    					</p>
    					<p>
    						Some might argue that this is an argument against hypermodularity and in favor of kitchen-sink type libraries.
@@ -1852,11 +1852,136 @@ double c_dasum( const int N, const double *X, const int stride ) {
    						If a third party add-on were to include a `manifest.json` which advertised source files, a stdlib add-on would be able to use the functionality contained therein in its implementation.
    					</p>
    					<p>
-   						I should also mention, the approach I just outline is not wholly a new idea--several people have tried their hands at building a C/C++ package manager, often inspired by npm--but I have yet to see an approach which allows explicitly resolving add-on dependencies within a node_modules dependency tree.
+   						I should also mention, the approach I just outlined is not wholly a new idea--several people have tried their hands at building a C/C++ package manager, often inspired by npm--but I have yet to see an approach which allows explicitly resolving add-on dependencies within a node_modules dependency tree.
    					</p>
    					<p>
    						If you are interested in learning more about we do things, see stdlib.
    					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform"><a title="N-API" href="https://github.com/nodejs/abi-stable-node">N-API</a></h2>
+
+				<aside class="notes">
+					A Node API for Node.js native add-ons.
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in slide-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Features</h2>
+				<div class="row">
+					<ul class="column column-3">
+						&nbsp;
+					</ul>
+					<ul class="column column-8">
+						<li class="fragment">Stability</li>
+						<li class="fragment">Compatibility</li>
+						<li class="fragment">VM Neutrality</li>
+					</ul>
+				</div>
+				<aside class="notes">
+					<ul>
+						<li>
+							A stable API abstraction. In the same spirit as NAN.
+						</li>
+						<li>
+							Compatibility across Node versions.
+						</li>
+						<li>
+							Key differentiator: same API across Node VMs; e.g., V8, Chakra, etc.
+						</li>
+					</ul>
+					<p>
+						In short, N-API promises native add-ons which just work. :)
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<pre><code class="hljs c" contenteditable>
+/* addon.cpp */
+#include &lt;node_api.h&gt;
+#include &lt;assert.h&gt;
+#include "hypot.h"
+
+namespace addon_hypot {
+
+    napi_value node_hypot( napi_env env, napi_callback_info info ) {
+        napi_status status;
+
+        size_t argc = 2;
+        napi_value argc[ 2 ];
+        status = napi_get_cb_info( env, info, &amp;argc, args, nullptr, nullptr );
+        assert( status == napi_ok );
+
+        if ( argc &lt; 2 ) {
+            napi_throw_type_error( env, "invalid invocation. Must provide 2 arguments." );
+            return nullptr;
+        }
+
+        napi_value vtype0;
+        status = napi_typeof( env, args[ 0 ], &amp;vtype0 );
+        assert( status == napi_ok );
+        if ( vtype0 != napi_number ) {
+            napi_throw_type_error( env, "invalid input argument. First argument must be a number." );
+            return nullptr;
+        }
+
+        napi_value vtype1;
+        status = napi_typeof( env, args[ 0 ], &amp;vtype1 );
+        assert( status == napi_ok );
+        if ( vtype1 != napi_number ) {
+            napi_throw_type_error( env, "invalid input argument. Second argument must be a number." );
+            return nullptr;
+        }
+
+        const double x;
+        status = napi_get_value_double( env, args[ 0 ], &amp;x );
+        assert( status == napi_ok );
+
+        const double y;
+        status = napi_get_value_double( env, args[ 1 ], &amp;y );
+        assert( status == napi_ok );
+
+        napi_value h;
+        status = napi_create_number( env, c_hypot( x, y ), &amp;h );
+        assert( status == napi_ok );
+
+        return h;
+    }
+
+    #define DECLARE_NAPI_METHOD( name, func ) { name, 0, func, 0, 0, 0, napi_default, 0 }
+
+    void Init( napi_env env, napi_value exports, napi_value module, void* priv ) {
+        napi_status status;
+        napi_property_descriptor addDescriptor = DECLARE_NAPI_METHOD( "hypot", node_hypot );
+        status = napi_define_properties( env, exports, 1, &amp;addDescriptor );
+        assert( status == napi_ok );
+    }
+
+    NAPI_MODULE( addon, Init )
+}
+				</code></pre>
+				<aside class="notes">
+					<p>
+						As an example of what a N-API add-on <em>might</em> look like, and I say <em>might</em> because the implementation is still experimental, here is the <code>hypot</code> add-on refactored from NAN to N-API.
+					</p>
+					<p>
+						The first notable difference is that we no longer directly call V8 methods, and, instead, everything goes through N-API.
+					</p>
+					<p>
+						The second notable difference is the usage of return value references and the returning of <code>status</code> values.
+					</p>
+					<p>
+						Otherwise, we still need to export an initialization function and an add-on still follows the same general structure.
+					</p>
 				</aside>
 			</section>
 
