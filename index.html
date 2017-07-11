@@ -1466,7 +1466,6 @@ double c_dasum( const int N, const double *X, const int stride ) {
       'target_name': '&lt;(addon_target_name)',
       'dependencies': [],
       'include_dirs': [
-        # NAN absolute file path:
         '&lt;!(node -e "require(\'nan\')")',
         './../include',
       ],
@@ -1509,8 +1508,6 @@ double c_dasum( const int N, const double *X, const int stride ) {
           'outputs': [
             '&lt;(addon_output_dir)/&lt;(addon_target_name).node',
           ],
-
-          # Define the command-line invocation:
           'action': [
             'cp',
             '&lt;(PRODUCT_DIR)/&lt;(addon_target_name).node',
