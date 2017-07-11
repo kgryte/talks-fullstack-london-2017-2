@@ -916,13 +916,48 @@ void dasumsub( const int *, const double *, const int *, double * );
 			</section>
 
 			<section class="center">
-				<pre><code class="hljs fortran" contenteditable>
+				<pre><code class="hljs c" contenteditable>
+/* dasum.h */
+#ifndef DASUM_H
+#define DASUM_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+double c_dasum( const int N, const double *X, const int stride );
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
 
 				</code></pre>
 
 				<aside class="notes">
 					<p>
+						We can now create the header file containing the prototype for our C wrapper, using the naming convention in which we attach <code>c_</code> as a prefix to the function name.
+					</p>
+				</aside>
+			</section>
 
+			<section class="center">
+				<pre><code class="hljs c" contenteditable>
+/* dasum_f.c */
+#include "dasum.h"
+#include "dasum_fortran.h"
+
+double c_dasum( const int N, const double *X, const int stride ) {
+	double sum;
+	dasumsub( &amp;N, X, &amp;stride, &amp;sum );
+	return sum;
+}
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Our C wrapper is fairly straightforward, passing all arguments by reference to the Fortran subroutine.
 					</p>
 				</aside>
 			</section>
