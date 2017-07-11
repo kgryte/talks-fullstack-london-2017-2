@@ -1650,6 +1650,218 @@ double c_dasum( const int N, const double *X, const int stride ) {
 
 			<section class="center">
 				<aside class="notes">
+					There is one other issue, and it is an issue perhaps a bit peculiar to the world of JavaScript. And that issue is <strong>modularity</strong>.
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Modularity</h2>
+
+				<aside class="notes">
+					<p>
+						In short, issues arise when you want to use source files from other packages, similar to "requiring" a module dependency.
+					</p>
+   					<p>
+   						For example, in stdlib, we have BLAS implementations, which are often used in other BLAS implementations. In a single library like BLAS, resolving individual implementations is straightforward as dependencies often reside in the same directory. In our case, dependencies are not co-localized, and, in fact, in the general case, we cannot assume dependency locations due to variability in the package dependency tree (e.g., a dependency could be a sibling or a descendant or even reside in a global package directory).
+   					</p>
+   					<p>
+   						And further, dependency source files can change based on the environment (e.g., whether a system library exists, or a third party library, or a reference implementation fallback, or lack of a Fortran compiler, etc.).
+   					</p>
+   					<p>
+   						If we were only concerned with BLAS, one solution to this problem might be to simply include all of BLAS with each individual package and only expose the desired functionality. Afterall, a linker is the original tree shaker.
+   					</p>
+   					<p>
+   						Just two problems. First, we don't want to have to download all of BLAS in order to build a package exporting a single function. And we certainly don't want to ship all of BLAS with each individual package, as that could lead to a massive amount of duplicated code being sent over the wire.
+   					</p>
+   					<p>
+   						Second, this solution does not scale. If your add-on depends on 10 functions, each from a different monolithic libraries, then you would have to download and install 10 different monolithic libraries for each build (intelligent caching aside).
+   					</p>
+   					<p>
+   						Some might argue that this is an argument against hypermodularity and in favor of kitchen-sink type libraries.
+   					</p>
+   					<p>
+   						This retort is, however, incorrect. The principle of modularity is an integral part of good software: only ship what you need when you need it, nothing more, end of story.
+   					</p>
+   					<p>
+						In this case, what is needed is a set of tools to help us better think about modularity in the context of native add-ons.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in slide-out" data-transition-speed="default">
+				<pre><code class="hljs javascript" contenteditable>
+{
+    "options": {
+        "os": "linux",
+        "blas": "",
+        "wasm": false
+    },
+    "fields": [
+        {
+            "field": "src",
+            "resolve": true,
+            "relative": true
+        },
+        {
+            "field": "include",
+            "resolve": true,
+            "relative": true
+        },
+        {
+            "field": "libraries",
+            "resolve": false,
+            "relative": false
+        },
+        {
+            "field": "libpath",
+            "resolve": true,
+            "relative": false
+        }
+    ],
+    "confs": [
+        {
+            "os": "linux",
+            "blas": "",
+            "wasm": false,
+            "src": [
+                "./src/dasum.f",
+                "./src/dasumsub.f",
+                "./src/dasum_f.c"
+            ],
+            "include": [
+                "./include"
+            ],
+            "libraries": [],
+            "libpath": [],
+            "dependencies": []
+        },
+        {
+            "os": "linux",
+            "blas": "openblas",
+            "wasm": false,
+            "src": [
+                "./src/dasum_cblas.c"
+            ],
+            "include": [
+                "./include"
+            ],
+            "libraries": [
+                "-lopenblas",
+                "-lpthread"
+            ],
+            "libpath": [],
+            "dependencies": []
+        },
+        {
+            "os": "mac",
+            "blas": "",
+            "wasm": false,
+            "src": [
+                "./src/dasum.f",
+                "./src/dasumsub.f",
+                "./src/dasum_f.c"
+            ],
+            "include": [
+                "./include"
+            ],
+            "libraries": [],
+            "libpath": [],
+            "dependencies": []
+        },
+        {
+            "os": "mac",
+            "blas": "apple_accelerate_framework",
+            "wasm": false,
+            "src": [
+                "./src/dasum_cblas.c"
+            ],
+            "include": [
+                "./include"
+            ],
+            "libraries": [
+                "-lblas"
+            ],
+            "libpath": [],
+            "dependencies": []
+        },
+        {
+            "os": "mac",
+            "blas": "openblas",
+            "wasm": false,
+            "src": [
+                "./src/dasum_cblas.c"
+            ],
+            "include": [
+                "./include"
+            ],
+            "libraries": [
+                "-lopenblas",
+                "-lpthread"
+            ],
+            "libpath": [],
+            "dependencies": []
+        },
+        {
+            "os": "win",
+            "blas": "",
+            "wasm": false,
+            "src": [
+                "./src/dasum.c"
+            ],
+            "include": [
+                "./include"
+            ],
+            "libraries": [],
+            "libpath": [],
+            "dependencies": []
+        },
+        {
+            "os": "",
+            "blas": "",
+            "wasm": true,
+            "src": [
+                "./src/dasum.c"
+            ],
+            "include": [
+                "./include"
+            ],
+            "libraries": [],
+            "libpath": [],
+            "dependencies": []
+        }
+    ]
+}
+				</code></pre>
+				<aside class="notes">
+					<p>
+   						To address this challenge in stdlib, we leverage the same algorithm used by `require` to resolve dependencies.
+   					</p>
+   					<p>
+   						Namely, we create a <code>manifest.json</code> file for each package which lists source files based on environment conditions as well as any package dependencies containing source files we want to use.
+   					</p>
+   					<p>
+   						When compiling a package, we load the <code>manifest.json</code>, walk the dependency tree, resolve source files tailored to both configuration and environment, and then dynamically populate GYP variables before compiling add-ons.
+   					</p>
+   					<p>
+   						This allows us to decompose traditionally monolithic libraries into separate components, while maintaining dependency resolution.
+   					</p>
+   					<p>
+   						I should note that the approach outlined is applicable more generally to all native add-ons, including those outside of stdlib.
+   					</p>
+   					<p>
+   						If a third party add-on were to include a `manifest.json` which advertised source files, a stdlib add-on would be able to use the functionality contained therein in its implementation.
+   					</p>
+   					<p>
+   						I should also mention, the approach I just outline is not wholly a new idea--several people have tried their hands at building a C/C++ package manager, often inspired by npm--but I have yet to see an approach which allows explicitly resolving add-on dependencies within a node_modules dependency tree.
+   					</p>
+   					<p>
+   						If you are interested in learning more about we do things, see stdlib.
+   					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
 					(next slide)
 				</aside>
 			</section>
