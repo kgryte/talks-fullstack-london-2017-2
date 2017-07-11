@@ -1292,10 +1292,10 @@ $ gcc -o dasum dasum_f.o dasumsub.o dasum_f.o -lgfortran
 
 				<aside class="notes">
 					<p>
-						Lastly, we add one more target to our <code>binding.gyp</code> file, and the purpose of this target is to move the compile add-on to a standard location.
+						Lastly, we add one more target to our <code>binding.gyp</code> file, and the purpose of this target is to move the compiled add-on to a standard location.
 					</p>
 					<p>
-						The main takeaway here is that GYP supports target dependencies. Here, the <code>copy_addon</code> target will not occur until <strong>after</strong> the add-on has been compiled. For those familiar with <i>make</i>, this is similar to Makefile prerequisites.
+						The main takeaway here is that GYP supports target dependencies. Here, the <code>copy_addon</code> target will not run until <strong>after</strong> the add-on has been compiled. For those familiar with <i>make</i>, this is similar to Makefile prerequisites.
 					</p>
 				</aside>
 			</section>
